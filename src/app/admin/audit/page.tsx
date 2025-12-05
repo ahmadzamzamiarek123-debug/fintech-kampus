@@ -164,10 +164,18 @@ export default function AdminAuditPage() {
                         <p className="text-xs text-gray-500 font-mono">{log.action}</p>
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-600 max-w-xs">
-                        {detail.amount && <span>Rp {Number(detail.amount).toLocaleString('id-ID')}</span>}
-                        {detail.targetUserName && <span className="ml-2">→ {String(detail.targetUserName)}</span>}
-                        {detail.tagihanTitle && <span>{String(detail.tagihanTitle)}</span>}
-                        {detail.description && <span className="text-gray-400"> ({String(detail.description)})</span>}
+                        {detail.amount !== undefined && (
+                          <span>Rp {detail.amount.toLocaleString('id-ID')}</span>
+                        )}
+                        {detail.targetUserName && (
+                          <span className="ml-2">→ {detail.targetUserName}</span>
+                        )}
+                        {detail.tagihanTitle && (
+                          <span>{detail.tagihanTitle}</span>
+                        )}
+                        {detail.description && (
+                          <span className="text-gray-400"> ({detail.description})</span>
+                        )}
                       </td>
                     </tr>
                   )
