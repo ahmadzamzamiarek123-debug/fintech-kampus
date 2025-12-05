@@ -66,9 +66,16 @@ export default function AdminAuditPage() {
     ADMIN: 'bg-purple-100 text-purple-700',
   }
 
-  function parseDetail(detail: string): Record<string, unknown> {
+  interface DetailData {
+    amount?: number
+    targetUserName?: string
+    tagihanTitle?: string
+    description?: string
+  }
+
+  function parseDetail(detail: string): DetailData {
     try {
-      return JSON.parse(detail)
+      return JSON.parse(detail) as DetailData
     } catch {
       return {}
     }

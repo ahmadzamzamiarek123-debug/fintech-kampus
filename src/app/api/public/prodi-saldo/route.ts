@@ -19,15 +19,6 @@ export async function GET(request: NextRequest) {
       where: { prodi },
     })
 
-    // Calculate income from payments (tagihan bayar)
-    const payments = await prisma.pembayaran.aggregate({
-      where: {
-        status: 'SUCCESS',
-        tagihan: { prodiTarget: prodi },
-      },
-      _sum: { id: true }, // We need to calculate based on tagihan nominal
-    })
-
     // Get total from successful payments
     const successfulPayments = await prisma.pembayaran.findMany({
       where: {
@@ -37,7 +28,7 @@ export async function GET(request: NextRequest) {
       include: { tagihan: { select: { nominal: true } } },
     })
 
-    const totalIncome = successfulPayments.reduce((sum, p) => sum + p.tagihan.nominal, 0)
+    const totalIncome = successfulPayments.reduce((sum, p) => sum + (p.tagihan?.nominal || 0), 0)
 
     // Get total expenses
     const expenses = await prisma.prodiPengeluaran.aggregate({
@@ -74,7 +65,7 @@ export async function GET(request: NextRequest) {
       include: { tagihan: { select: { nominal: true } } },
     })
 
-    const monthlyIncome = monthlyPayments.reduce((sum, p) => sum + p.tagihan.nominal, 0)
+    const monthlyIncome = monthlyPayments.reduce((sum, p) => sum + (p.tagihan?.nominal || 0), 0)
 
     const monthlyExpenses = await prisma.prodiPengeluaran.aggregate({
       where: {
