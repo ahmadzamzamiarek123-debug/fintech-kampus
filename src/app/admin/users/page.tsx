@@ -8,7 +8,6 @@ import { Input, Select } from "@/components/ui/Input";
 import { Modal } from "@/components/ui/Modal";
 import { Badge } from "@/components/ui/Badge";
 import { formatRupiah } from "@/lib/utils";
-import { PRODI_OPTIONS, ANGKATAN_OPTIONS } from "@/lib/constants";
 
 interface User {
   id: string;
@@ -52,9 +51,34 @@ export default function AdminUsersPage() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
+  // Available scopes from existing operators
+  const [availableScopes, setAvailableScopes] = useState<{
+    prodiList: string[];
+    angkatanByProdi: Record<string, string[]>;
+  }>({ prodiList: [], angkatanByProdi: {} });
+
   useEffect(() => {
     fetchUsers();
   }, [filterProdi, filterStatus, page]);
+
+  // Fetch available scopes when modal opens
+  useEffect(() => {
+    if (showCreateModal) {
+      fetchAvailableScopes();
+    }
+  }, [showCreateModal]);
+
+  async function fetchAvailableScopes() {
+    try {
+      const res = await fetch("/api/admin/available-scopes");
+      const data = await res.json();
+      if (data.success) {
+        setAvailableScopes(data.data);
+      }
+    } catch (error) {
+      console.error("Error fetching available scopes:", error);
+    }
+  }
 
   async function fetchUsers() {
     setIsLoading(true);
@@ -392,10 +416,16 @@ export default function AdminUsersPage() {
             <Select
               label="Prodi"
               value={newUser.prodi}
-              onChange={(e) =>
-                setNewUser({ ...newUser, prodi: e.target.value })
-              }
-              options={[{ value: "", label: "Pilih Prodi" }, ...PRODI_OPTIONS]}
+              onChange={(e) => {
+                setNewUser({ ...newUser, prodi: e.target.value, angkatan: "" });
+              }}
+              options={[
+                { value: "", label: "Pilih Prodi" },
+                ...availableScopes.prodiList.map((p) => ({
+                  value: p,
+                  label: p,
+                })),
+              ]}
               required
             />
 
@@ -406,12 +436,29 @@ export default function AdminUsersPage() {
                 setNewUser({ ...newUser, angkatan: e.target.value })
               }
               options={[
-                { value: "", label: "Pilih Angkatan" },
-                ...ANGKATAN_OPTIONS,
+                {
+                  value: "",
+                  label: newUser.prodi ? "Pilih Angkatan" : "Pilih prodi dulu",
+                },
+                ...(newUser.prodi &&
+                availableScopes.angkatanByProdi[newUser.prodi]
+                  ? availableScopes.angkatanByProdi[newUser.prodi].map((a) => ({
+                      value: a,
+                      label: `Angkatan ${a}`,
+                    }))
+                  : []),
               ]}
+              disabled={!newUser.prodi}
               required
             />
           </div>
+
+          {availableScopes.prodiList.length === 0 && (
+            <div className="p-3 bg-yellow-50 text-yellow-700 rounded-lg text-sm">
+              ⚠️ Belum ada Operator aktif. Buat Operator terlebih dahulu sebelum
+              menambah User.
+            </div>
+          )}
 
           <Input
             label="Password"

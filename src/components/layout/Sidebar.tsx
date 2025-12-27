@@ -204,6 +204,11 @@ const userNav: NavItem[] = [
 const operatorNav: NavItem[] = [
   { label: "Dashboard", href: "/operator/dashboard", icon: <HomeIcon /> },
   {
+    label: "Data Mahasiswa",
+    href: "/operator/mahasiswa",
+    icon: <UsersIcon />,
+  },
+  {
     label: "Kelola Tagihan",
     href: "/operator/tagihan",
     icon: <DocumentIcon />,
