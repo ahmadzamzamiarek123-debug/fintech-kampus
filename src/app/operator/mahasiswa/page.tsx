@@ -21,22 +21,27 @@ export default function OperatorMahasiswaPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
 
+  // Real-time polling: fetch every 3 seconds for live updates
   useEffect(() => {
-    fetchUsers();
-  }, []);
-
-  async function fetchUsers() {
-    setIsLoading(true);
-    try {
-      const res = await fetch("/api/operator/mahasiswa");
-      const data = await res.json();
-      setUsers(data.data || []);
-    } catch (error) {
-      console.error("Error fetching users:", error);
-    } finally {
-      setIsLoading(false);
+    async function fetchUsersData() {
+      try {
+        const res = await fetch("/api/operator/mahasiswa");
+        const data = await res.json();
+        setUsers(data.data || []);
+      } catch (error) {
+        console.error("Error fetching users:", error);
+      } finally {
+        setIsLoading(false);
+      }
     }
-  }
+
+    fetchUsersData();
+
+    // Set up polling interval for real-time student data updates
+    const pollInterval = setInterval(fetchUsersData, 3000); // 3 seconds
+
+    return () => clearInterval(pollInterval);
+  }, []);
 
   const filteredUsers = users.filter(
     (u) =>
